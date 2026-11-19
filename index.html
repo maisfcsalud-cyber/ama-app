@@ -161,8 +161,10 @@ function $(id){return document.getElementById(id)}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function norm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
 function toast(m,err){var t=$('toast');t.textContent=m;t.className='toast'+(err?' err':'');t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(function(){t.style.display='none'},err?6000:2500)}
+var URL_APP='https://script.google.com/macros/s/AKfycbxxWSRwanzqpYC0QK7MFcYI3A_xDwf3LdR725_PYvk-l_i8uvvAiiorzS1QyTzRVBc5/exec';/* pega aquí la URL /exec entre las comillas */
 function getCfg(){
   var u,k;try{u=localStorage.getItem('ama_url');k=localStorage.getItem('ama_key')}catch(e){}
+  if(URL_APP)u=URL_APP;
   if(!u){u=(prompt('Pega la URL de la app (termina en /exec):')||'').trim();
     if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(u)){toast('URL no válida',true);return null}
     try{localStorage.setItem('ama_url',u)}catch(e){}}
