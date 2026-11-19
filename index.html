@@ -110,7 +110,10 @@
     <div id="fEgr" class="card hide">
       <b>Egreso del programa</b>
       <input type="search" id="eBus" placeholder="Buscar por nombre, RUT o grupo…" oninput="renderActivos()" style="margin-top:8px">
+      <div id="eCnt" style="font-size:12px;color:var(--mut);margin-top:6px"></div>
       <div id="eLista" style="max-height:260px;overflow:auto;margin-top:8px"></div>
+      <b style="display:block;margin-top:16px">Egresos registrados en la planilla</b>
+      <div id="eHechos" style="max-height:320px;overflow:auto;margin-top:8px"></div>
       <div id="eForm" class="hide">
         <div style="margin:12px 0 4px;font-weight:700" id="eSel"></div>
         <div class="row"><div><label class="lbl">Mes de egreso</label><select id="eMes"></select></div>
@@ -294,17 +297,23 @@ function cargarIE(){
   $('iMes').innerHTML=mesOpts();$('eMes').innerHTML=mesOpts();
   $('iMes').value=$('eMes').value=new Date().getMonth()+1;
   run('api_listaIE',[],function(r){
-    IE.cargado=true;IE.activos=r.activos;IE.clubes=r.clubes;
+    IE.cargado=true;IE.activos=r.activos;IE.egresados=r.egresados||[];IE.clubes=r.clubes;
     $('dlGrupos').innerHTML=r.grupos.map(function(g){return'<option value="'+esc(g)+'">'}).join('');
     var o='<option value="">— no agregar a ninguna hoja —</option>'+r.clubes.map(function(c){return'<option>'+esc(c)+'</option>'}).join('');
     $('iClub').innerHTML=o;$('eClub').innerHTML=o.replace('no agregar a ninguna hoja','no anotar en hoja de club');
     renderActivos();
   });
 }
-function renderActivos(){
+function renderEgresados(){
   var q=norm($('eBus').value);
-  var l=IE.activos.filter(function(p){return norm(p.nombre+' '+p.rut+' '+p.grupo).indexOf(q)>=0}).slice(0,40);
+  var l=(IE.egresados||[]).filter(function(p){return norm(p.nombre+' '+p.rut+' '+p.grupo).indexOf(q)>=0});
+  $('eHechos').innerHTML=l.map(function(p){return'<div class="soc"><div class="nm">'+esc(p.nombre)+'<small>'+esc(p.rut)+' · '+esc(p.grupo)+' · '+esc(p.mesEg||'sin mes')+' · '+esc(p.motivo||'sin motivo')+'</small></div></div>'}).join('')||'<div style="color:var(--mut);padding:8px">Sin resultados</div>';
+}
+function renderActivos(){renderEgresados();
+  var q=norm($('eBus').value);
+  var l=IE.activos.filter(function(p){return norm(p.nombre+' '+p.rut+' '+p.grupo).indexOf(q)>=0});
   $('eLista').innerHTML=l.map(function(p){return'<div class="soc" onclick="selEgreso('+p.fila+')"><div class="nm">'+esc(p.nombre)+'<small>'+esc(p.rut)+' · '+esc(p.grupo)+'</small></div></div>'}).join('')||'<div style="color:var(--mut);padding:8px">Sin resultados</div>';
+  $('eCnt').textContent=l.length+' activos · '+(IE.egresados||[]).length+' egresados en total';
 }
 function selEgreso(fila){
   var p=IE.activos.filter(function(x){return x.fila===fila})[0];IE.sel=p;
