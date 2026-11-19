@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<base target="_top">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f6f5c">
+<title>AMA · Pasar lista</title>
+<style>
+  :root{--g:#1f6f5c;--gd:#14503f;--gl:#e7f0ec;--ink:#1d2b27;--mut:#6b7c76;--line:#d9e2de;--bad:#b3402a;--warn:#b7791f;--bg:#f6f8f7}
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{margin:0;font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);padding-bottom:96px}
+  header{background:var(--g);color:#fff;padding:14px 16px 0;position:sticky;top:0;z-index:5}
+  header h1{margin:0 0 10px;font-size:18px;font-weight:650}
+  nav{display:flex;gap:4px}
+  nav button{font-size:13px;flex:1;padding-left:2px!important;padding-right:2px!important;white-space:nowrap;background:transparent;color:#cfe5dd;border:0;padding:10px 0;font-size:15px;border-bottom:3px solid transparent;font-weight:600}
+  nav button.on{color:#fff;border-color:#fff}
+  main{max-width:720px;margin:0 auto;padding:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+  .club{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-bottom:8px;font-size:17px;color:var(--ink)}
+  .club small{color:var(--mut);font-size:14px}
+  input[type=search],input[type=date],select{width:100%;padding:12px;border:1px solid var(--line);border-radius:10px;font-size:16px;background:#fff}
+  label.lbl{display:block;font-size:13px;color:var(--mut);margin:10px 0 4px;font-weight:600}
+  .seg{display:flex;border:1px solid var(--g);border-radius:10px;overflow:hidden}
+  .seg button{flex:1;padding:12px 6px;border:0;background:#fff;font-size:15px;font-weight:650;color:var(--g)}
+  .seg button.on{background:var(--g);color:#fff}
+  .row{display:flex;gap:10px}.row>*{flex:1}
+  .soc{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);user-select:none}
+  .soc:last-child{border:0}
+  .soc .box{width:30px;height:30px;border-radius:8px;border:2px solid #aab8b2;flex:none;display:grid;place-items:center;color:#fff;font-weight:700}
+  .soc.on .box{background:var(--g);border-color:var(--g)}
+  .soc .nm{flex:1;font-size:16px}.soc .nm small{display:block;color:var(--mut);font-size:12px}
+  .tag{font-size:11px;padding:2px 7px;border-radius:99px;font-weight:700}
+  .tag.ok{background:var(--gl);color:var(--gd)}.tag.vencido{background:#fbe9e5;color:var(--bad)}.tag.sin{background:#fdf1d9;color:var(--warn)}
+  .bar{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:10px 14px calc(10px + env(safe-area-inset-bottom));display:flex;gap:10px;align-items:center;z-index:6}
+  .bar .cnt{font-weight:700;min-width:84px}
+  .btn{background:var(--g);color:#fff;border:0;border-radius:12px;padding:14px 18px;font-size:17px;font-weight:700;flex:1}
+  .btn:disabled{opacity:.5}
+  .ghost{background:#fff;color:var(--g);border:1px solid var(--g);border-radius:10px;padding:9px 12px;font-weight:650;font-size:14px}
+  .toast{position:fixed;left:14px;right:14px;bottom:86px;background:#1d2b27;color:#fff;padding:12px 14px;border-radius:12px;z-index:9;display:none}
+  .toast.err{background:var(--bad)}
+  .kpi{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+  .kpi div{background:var(--gl);border-radius:12px;padding:10px;text-align:center}.kpi b{display:block;font-size:22px;color:var(--gd)}.kpi span{font-size:12px;color:var(--mut)}
+  .warn{font-size:13px;color:var(--warn);border-top:1px solid var(--line);padding:6px 0}
+  .hide{display:none!important}
+  .back{background:none;border:0;color:#fff;font-size:15px;padding:0 0 8px;font-weight:600}
+</style>
+</head>
+<body>
+<header>
+  <h1>AMA · Más Adultos Mayores Autovalentes</h1>
+  <nav><button id="t1" class="on" onclick="tab(1)">Pasar lista</button><button id="t4" onclick="tab(4)">Ingresos</button><button id="t2" onclick="tab(2)">Estadística</button><button id="t3" onclick="tab(3)">Ordenar</button></nav>
+</header>
+<main>
+  <!-- LISTA DE CLUBES -->
+  <section id="v1">
+    <input type="search" id="qClub" placeholder="Buscar club…" oninput="renderClubs()">
+    <label style="display:flex;gap:8px;align-items:center;margin:10px 2px;color:var(--mut);font-size:14px"><input type="checkbox" id="showHidden" onchange="loadClubs()"> Mostrar clubes ocultos</label>
+    <div id="clubs"><div class="card">Cargando clubes…</div></div>
+  </section>
+
+  <!-- PASAR LISTA -->
+  <section id="v1b" class="hide">
+    <button class="ghost" onclick="backToClubs()">← Clubes</button>
+    <div class="card" style="margin-top:10px">
+      <b id="clubName" style="font-size:18px"></b>
+      <label class="lbl">Sesión</label>
+      <select id="dia" onchange="pickDay()"></select>
+      <div class="row">
+        <div><label class="lbl">Fecha</label><input type="date" id="fecha"></div>
+        <div><label class="lbl">Tipo de sesión</label>
+          <div class="seg"><button id="tMC" onclick="setTipo('MC')">MC</button><button id="tME" onclick="setTipo('ME')">MA</button></div></div>
+      </div>
+      <div id="sinCols" class="warn hide" style="font-weight:600">Este club no tiene columnas libres. Agrega semanas para poder seguir pasando lista.</div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:10px"><select id="nSem" style="flex:1"><option>1</option><option>2</option><option selected>4</option><option>6</option><option>8</option><option>12</option></select><button class="ghost" id="btnSem" onclick="agregarSemanas()" style="flex:2">➕ Agregar semanas</button></div>
+      <div style="font-size:12px;color:var(--mut);margin-top:6px">MC = motor cognitivo · MA = motor autocuidado. Cada día se registran las 2 sesiones.</div>
+    </div>
+    <div class="card">
+      <div class="row" style="align-items:center;margin-bottom:6px">
+        <input type="search" id="qSoc" placeholder="Buscar socio…" oninput="renderSocios()" style="flex:2">
+        <button class="ghost" onclick="markAll(true)">Todos</button>
+        <button class="ghost" onclick="markAll(false)">Ninguno</button>
+      </div>
+      <div id="socios"></div>
+    </div>
+  </section>
+
+  <!-- INGRESOS Y EGRESOS -->
+  <section id="v4" class="hide">
+    <div class="card">
+      <div class="seg"><button id="mIng" class="on" onclick="modoIE('ing')">Ingreso</button><button id="mEgr" onclick="modoIE('egr')">Egreso</button></div>
+    </div>
+    <div id="fIng" class="card">
+      <b>Nuevo ingreso al programa</b>
+      <label class="lbl">Nombre completo</label><input type="search" id="iNom" autocomplete="off">
+      <div class="row"><div><label class="lbl">RUT</label><input type="search" id="iRut" placeholder="12345678-5" autocomplete="off"></div>
+      <div><label class="lbl">Fecha de nacimiento</label><input type="date" id="iFnac"></div></div>
+      <div class="row"><div><label class="lbl">Sexo</label><div class="seg"><button id="sF" onclick="setSexo('F')">F</button><button id="sM" onclick="setSexo('M')">M</button></div></div>
+      <div><label class="lbl">Teléfono</label><input type="search" id="iTel"></div></div>
+      <label class="lbl">Dirección</label><input type="search" id="iDir">
+      <div class="row"><div><label class="lbl">Grupo (Ingreso-Egreso)</label><input type="search" id="iGrupo" list="dlGrupos"><datalist id="dlGrupos"></datalist></div>
+      <div><label class="lbl">Agregar a la hoja del club</label><select id="iClub"></select></div></div>
+      <div class="row"><div><label class="lbl">Mes de ingreso</label><select id="iMes"></select></div>
+      <div><label class="lbl">ECICEP</label><select id="iEci"><option value="">—</option><option>SI</option><option>NO</option></select></div></div>
+      <div class="row"><div><label class="lbl">Condición (EFAM)</label><select id="iEfam"><option value="">Elegir…</option><option value="ASR">ASR · autovalente sin riesgo</option><option value="ACR">ACR · con riesgo</option><option value="RDD">RDD · riesgo de dependencia</option><option value="NA">NA · sin EMPAM</option></select></div>
+      <div><label class="lbl">Mes del EMPAM</label><input type="month" id="iEmpam"></div></div>
+      <div class="row"><div><label class="lbl">HAQ-8 inicial</label><input type="number" inputmode="decimal" id="iHaq"></div><div><label class="lbl">TUG inicial</label><input type="number" inputmode="decimal" id="iTug"></div><div><label class="lbl">WHO-5 inicial</label><input type="number" inputmode="decimal" id="iWho"></div></div>
+      <button class="btn" style="width:100%;margin-top:14px" id="btnIng" onclick="guardarIngreso()">Registrar ingreso</button>
+    </div>
+    <div id="fEgr" class="card hide">
+      <b>Egreso del programa</b>
+      <input type="search" id="eBus" placeholder="Buscar por nombre, RUT o grupo…" oninput="renderActivos()" style="margin-top:8px">
+      <div id="eLista" style="max-height:260px;overflow:auto;margin-top:8px"></div>
+      <div id="eForm" class="hide">
+        <div style="margin:12px 0 4px;font-weight:700" id="eSel"></div>
+        <div class="row"><div><label class="lbl">Mes de egreso</label><select id="eMes"></select></div>
+        <div><label class="lbl">Motivo</label><select id="eMot"><option value="">Elegir…</option><option>COMPLETA CICLO</option><option>ABANDONO</option><option>TRASLADO</option><option>FALLECIMIENTO</option></select></div></div>
+        <div class="row"><div><label class="lbl">HAQ-8 final</label><input type="number" inputmode="decimal" id="eHaq"></div><div><label class="lbl">TUG final</label><input type="number" inputmode="decimal" id="eTug"></div><div><label class="lbl">WHO-5 final</label><input type="number" inputmode="decimal" id="eWho"></div></div>
+        <label class="lbl">Anotar también en la hoja del club</label><select id="eClub"></select>
+        <div style="font-size:12px;color:var(--mut);margin-top:6px">Para que cuente en A03-D.4 debe completar ciclo y tener HAQ-8 y TUG inicial y final.</div>
+        <button class="btn" style="width:100%;margin-top:14px" id="btnEgr" onclick="guardarEgreso()">Registrar egreso</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ORDENAR ARCHIVOS -->
+  <section id="v3" class="hide">
+    <div class="card">
+      <b>Ordenar mis archivos</b>
+      <p style="color:var(--mut);margin:6px 0 10px;font-size:14px">Agrega listas desplegables, colores y filas congeladas; unifica datos como "octubre/OCTUBRE" o "asr/ASR"; y crea una hoja LEEME en cada archivo. No inserta ni borra filas ni columnas. Cada cambio queda anotado en la hoja REGISTRO_LIMPIEZA.</p>
+      <button class="ghost" style="width:100%;margin-bottom:10px" id="btnRev" onclick="ordenar(false)">1 · Solo revisar (no cambia nada)</button>
+      <button class="btn" style="width:100%" id="btnOrd" onclick="ordenar(true)">2 · Ordenar ahora</button>
+    </div>
+    <div id="ordOut"></div>
+  </section>
+
+  <!-- ESTADÍSTICA -->
+  <section id="v2" class="hide">
+    <div class="card">
+      <b>Actualizar estadística del REM</b>
+      <p style="color:var(--mut);margin:6px 0 10px;font-size:14px">Lee las asistencias de todos los clubes y la hoja Ingreso-Egreso, y escribe las tablas A03‑D.4, A05‑M y A27‑D/H/I en la hoja REM_AUTO del archivo de Estadística.</p>
+      <label class="lbl">Mes</label>
+      <select id="mes"></select>
+      <button class="btn" style="width:100%;margin-top:12px" id="btnRem" onclick="actualizar()">Actualizar REM_AUTO</button>
+      <button class="ghost" style="width:100%;margin-top:10px" id="btnTot" onclick="totales()">Solo totales acumulados (rápido)</button>
+    </div>
+    <div id="remOut"></div>
+  </section>
+</main>
+
+<div class="bar hide" id="bar"><div class="cnt" id="cnt">0 presentes</div><button class="btn" id="btnSave" onclick="guardar()">Guardar asistencia</button></div>
+<div class="toast" id="toast"></div>
+
+<script>
+var S={clubs:[],club:null,tipo:'MC',presentes:{},idx:null};
+var MESES=['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+function $(id){return document.getElementById(id)}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function norm(s){return String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase()}
+function toast(m,err){var t=$('toast');t.textContent=m;t.className='toast'+(err?' err':'');t.style.display='block';clearTimeout(toast.h);toast.h=setTimeout(function(){t.style.display='none'},err?6000:2500)}
+function getCfg(){
+  var u,k;try{u=localStorage.getItem('ama_url');k=localStorage.getItem('ama_key')}catch(e){}
+  if(!u){u=(prompt('Pega la URL de la app (termina en /exec):')||'').trim();
+    if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(u)){toast('URL no válida',true);return null}
+    try{localStorage.setItem('ama_url',u)}catch(e){}}
+  if(!k){k=(prompt('Clave de acceso:')||'').trim();if(!k)return null;try{localStorage.setItem('ama_key',k)}catch(e){}}
+  return {url:u,key:k};
+}
+function run(fn,args,ok){
+  var cfg=getCfg();if(!cfg){busy(false);return}
+  fetch(cfg.url,{method:'POST',headers:{'Content-Type':'text/plain;charset=utf-8'},body:JSON.stringify({fn:fn,args:args||[],key:cfg.key})})
+   .then(function(r){return r.json()})
+   .then(function(r){if(r.ok){ok(r.data)}else{if(/Clave/.test(r.error)){try{localStorage.removeItem('ama_key')}catch(e){}}toast(r.error,true);busy(false)}})
+   .catch(function(e){toast('Sin conexión con la app: '+(e.message||e),true);busy(false)});
+}
+function busy(b){['btnSave','btnRem','btnRev','btnOrd','btnSem','btnIng','btnEgr','btnTot'].forEach(function(i){if($(i))$(i).disabled=b})}
+
+function tab(n){
+  $('t1').className=n==1?'on':'';$('t2').className=n==2?'on':'';$('t3').className=n==3?'on':'';$('t4').className=n==4?'on':'';
+  $('v2').className=n==2?'':'hide';$('v3').className=n==3?'':'hide';$('v4').className=n==4?'':'hide';if(n==4)cargarIE();
+  var inClub=!!S.club;
+  $('v1').className=(n==1&&!inClub)?'':'hide';$('v1b').className=(n==1&&inClub)?'':'hide';
+  $('bar').className=(n==1&&inClub)?'bar':'bar hide';
+}
+
+/* ---- clubes ---- */
+function loadClubs(){
+  run('api_getClubs',[$('showHidden').checked],function(c){S.clubs=c;renderClubs()});
+}
+function renderClubs(){
+  var q=norm($('qClub').value);
+  var h=S.clubs.filter(function(c){return norm(c.name).indexOf(q)>=0}).map(function(c,i){
+    return '<button class="club" onclick="openClub(\''+esc(c.name).replace(/'/g,"\\'")+'\')"><span>'+esc(c.name)+(c.hidden?' <small>(oculto)</small>':'')+'</span><small>'+c.socios+' socios ›</small></button>';
+  }).join('');
+  $('clubs').innerHTML=h||'<div class="card">Sin resultados</div>';
+}
+function openClub(name){
+  $('clubs').innerHTML='<div class="card">Abriendo '+esc(name)+'…</div>';
+  run('api_getClub',[name],function(c){
+    S.club=c;S.idx=null;S.presentes={};
+    $('clubName').textContent=c.name;
+    var sel='<option value="new">➕ Nueva sesión'+(c.proximo?'':' (sin columnas libres)')+'</option>';
+    c.dias.forEach(function(d){sel+='<option value="'+d.idx+'">'+d.fecha+' · '+(d.tipo=='ME'?'MA':d.tipo)+' · '+d.presentes.length+' presentes</option>'});
+    $('dia').innerHTML=sel;$('dia').value='new';
+    $('fecha').value=hoy();
+    setTipo(c.proximo&&c.proximo.tipo==='ME'?'ME':'MC');
+    $('sinCols').className=c.proximo?'warn hide':'warn';$('btnSave').disabled=false;
+    $('qSoc').value='';renderSocios();tab(1);window.scrollTo(0,0);
+  });
+}
+function hoy(){var d=new Date();return d.getFullYear()+'-'+('0'+(d.getMonth()+1)).slice(-2)+'-'+('0'+d.getDate()).slice(-2)}
+function backToClubs(){S.club=null;tab(1);loadClubs()}
+function pickDay(){
+  var v=$('dia').value;S.presentes={};
+  if(v==='new'){S.idx=null;$('fecha').value=hoy();setTipo(S.club.proximo&&S.club.proximo.tipo==='ME'?'ME':'MC')}
+  else{var d=S.club.dias.filter(function(x){return String(x.idx)===v})[0];S.idx=d.idx;$('fecha').value=d.fecha;setTipo(d.tipo==='ME'?'ME':'MC');d.presentes.forEach(function(r){S.presentes[r]=1})}
+  renderSocios();
+}
+function setTipo(t){S.tipo=t;$('tMC').className=t==='MC'?'on':'';$('tME').className=t==='ME'?'on':''}
+function renderSocios(){
+  var q=norm($('qSoc').value);
+  $('socios').innerHTML=S.club.socios.filter(function(s){return norm(s.nombre+' '+s.rut).indexOf(q)>=0}).map(function(s){
+    var on=S.presentes[s.row]?' on':'';
+    var tg=s.empamEstado==='ok'?'EMPAM al día':(s.empamEstado==='vencido'?'EMPAM vencido':'sin EMPAM');
+    return '<div class="soc'+on+'" onclick="toggle('+s.row+')"><div class="box">'+(on?'✓':'')+'</div><div class="nm">'+esc(s.nombre)+'<small>'+esc(s.rut)+'</small></div><span class="tag '+s.empamEstado+'">'+tg+'</span></div>';
+  }).join('')||'<div style="color:var(--mut)">Sin resultados</div>';
+  var n=Object.keys(S.presentes).length;$('cnt').textContent=n+' presentes';
+}
+function toggle(r){if(S.presentes[r])delete S.presentes[r];else S.presentes[r]=1;renderSocios()}
+function markAll(v){var q=norm($('qSoc').value);S.club.socios.forEach(function(s){if(norm(s.nombre+' '+s.rut).indexOf(q)>=0){if(v)S.presentes[s.row]=1;else delete S.presentes[s.row]}});renderSocios()}
+function guardar(){
+  var f=$('fecha').value;if(!f){toast('Elige la fecha',true);return}
+  var n=Object.keys(S.presentes).length;
+  if(!n&&!confirm('No marcaste a nadie. ¿Guardar igual?'))return;
+  busy(true);
+  run('api_guardar',[{club:S.club.name,idx:S.idx,fecha:f,tipo:S.tipo,presentes:Object.keys(S.presentes).map(Number)}],function(r){
+    busy(false);toast('✓ Guardado en el Drive ('+r.presentes+' presentes)'+(r.estadActualizada?' · estadística al día':''));openClub(S.club.name);
+  });
+}
+
+/* ---- estadística ---- */
+function initMes(){var s='';for(var i=0;i<12;i++)s+='<option value="'+(i+1)+'">'+MESES[i]+'</option>';$('mes').innerHTML=s;$('mes').value=new Date().getMonth()+1}
+function totales(){
+  busy(true);$('remOut').innerHTML='<div class="card">Calculando totales…</div>';
+  run('api_actualizarEstad',[],function(r){
+    busy(false);var a=r.anual;
+    var h='<div class="card"><b>Acumulado del año ✓</b><div class="kpi">'
+      +'<div><b>'+a.tMC+' / '+a.tMA+'</b><span>MC / MA (días)</span></div><div><b>'+(a.tMC+a.tMA)+' · '+a.talleres+'</b><span>motor · talleres</span></div><div><b>'+(a.pMC+a.pMA)+'</b><span>participantes (suma)</span></div>'
+      +'<div><b>'+r.ing+' → '+r.ingOK+'</b><span>ingresos hoja → REM</span></div><div><b>'+r.egr+' → '+r.egrOK+'</b><span>egresos hoja → REM</span></div><div><b>'+r.noContados+'</b><span>personas no contadas</span></div></div>'
+      +'<a class="btn" style="display:block;text-align:center;text-decoration:none" target="_blank" href="'+esc(r.urlAcum)+'">Abrir estadística acumulada</a>'
+      +'<a class="ghost" style="display:block;text-align:center;text-decoration:none;margin-top:8px" target="_blank" href="'+esc(r.urlIE)+'">Ver quiénes no se cuentan</a></div>';
+    if(r.nAlertas)h+='<div class="card"><b>Alertas de asistencia</b>'+r.alertas.map(function(w){return'<div class="warn">'+esc(w)+'</div>'}).join('')+(r.nAlertas>r.alertas.length?'<div class="warn">… y '+(r.nAlertas-r.alertas.length)+' más</div>':'')+'</div>';
+    $('remOut').innerHTML=h;
+  });
+}
+function actualizar(){
+  busy(true);$('remOut').innerHTML='<div class="card">Calculando… puede tardar unos segundos.</div>';
+  run('api_actualizarREM',[$('mes').value],function(r){
+    busy(false);
+    var h='<div class="card"><b>'+esc(r.mes)+' listo ✓</b><div class="kpi">'
+      +'<div><b>'+r.motor.ses+'</b><span>sesiones Motor</span></div><div><b>'+r.motor.asist+'</b><span>participantes Motor</span></div><div><b>'+r.cognitivo.ses+' / '+r.autocuidado.ses+'</b><span>ses. MC / MA</span></div>'
+      +'<div><b>'+r.ingresos+'</b><span>ingresos del mes</span></div><div><b>'+r.egresos+'</b><span>egresos del mes</span></div><div><b>'+r.nAlertas+'</b><span>alertas de datos</span></div></div>'
+      +'<a class="btn" style="display:block;text-align:center;text-decoration:none" target="_blank" href="'+esc(r.url)+'">Abrir REM_AUTO</a>'
+      +'<a class="ghost" style="display:block;text-align:center;text-decoration:none;margin-top:8px" target="_blank" href="'+esc(r.urlAcum)+'">Ver estadística acumulada</a>'
+      +'<a class="ghost" style="display:block;text-align:center;text-decoration:none;margin-top:8px" target="_blank" href="'+esc(r.urlIE)+'">Ingresos/egresos: '+r.noContados+' personas no se cuentan</a></div>';
+    if(r.nAlertas)h+='<div class="card"><b>Alertas de datos</b>'+r.alertas.map(function(w){return'<div class="warn">'+esc(w)+'</div>'}).join('')+(r.nAlertas>r.alertas.length?'<div class="warn">… y '+(r.nAlertas-r.alertas.length)+' más en REM_AUTO</div>':'')+'</div>';
+    $('remOut').innerHTML=h;
+  });
+}
+function ordenar(aplicar){
+  if(aplicar&&!confirm('Se aplicarán listas, colores y correcciones de datos en tus 3 archivos. Los cambios de valores quedan en REGISTRO_LIMPIEZA. ¿Continuar?'))return;
+  busy(true);$('ordOut').innerHTML='<div class="card">Trabajando… puede tardar 1–3 minutos.</div>';
+  run('api_ordenar',[aplicar],function(r){
+    busy(false);
+    $('ordOut').innerHTML='<div class="card"><b>'+(r.aplicado?'Listo ✓':'Revisión terminada (nada cambiado)')+'</b><div class="kpi"><div><b>'+r.hojas+'</b><span>hojas revisadas</span></div><div><b>'+r.cambios+'</b><span>datos '+(r.aplicado?'corregidos':'por corregir')+'</span></div><div><b>'+r.revisar+'</b><span>a revisar a mano</span></div></div>'
+      +'<a class="btn" style="display:block;text-align:center;text-decoration:none" target="_blank" href="'+esc(r.url)+'">Ver REGISTRO_LIMPIEZA</a>'+(r.truncado?'<div class="warn">El registro se cortó en 4000 filas.</div>':'')+'</div>';
+  });
+}
+/* ---- agregar semanas ---- */
+function agregarSemanas(){
+  var n=$('nSem').value;
+  if(!confirm('Se agregarán '+n+' semana(s) al final de la hoja "'+S.club.name+'". ¿Continuar?'))return;
+  busy(true);
+  run('api_agregarSemanas',[S.club.name,Number(n)],function(r){busy(false);toast('✓ Se agregaron '+r.agregadas+' semana(s) ('+r.columnas+' columnas)');openClub(S.club.name)});
+}
+
+/* ---- ingresos y egresos ---- */
+var IE={activos:[],sel:null,sexo:''};
+function modoIE(m){$('mIng').className=m=='ing'?'on':'';$('mEgr').className=m=='egr'?'on':'';$('fIng').className=m=='ing'?'card':'card hide';$('fEgr').className=m=='egr'?'card':'card hide'}
+function setSexo(s){IE.sexo=s;$('sF').className=s=='F'?'on':'';$('sM').className=s=='M'?'on':''}
+function mesOpts(){var s='';for(var i=0;i<12;i++)s+='<option value="'+(i+1)+'">'+MESES[i]+'</option>';return s}
+function cargarIE(){
+  if(IE.cargado)return;
+  $('iMes').innerHTML=mesOpts();$('eMes').innerHTML=mesOpts();
+  $('iMes').value=$('eMes').value=new Date().getMonth()+1;
+  run('api_listaIE',[],function(r){
+    IE.cargado=true;IE.activos=r.activos;IE.clubes=r.clubes;
+    $('dlGrupos').innerHTML=r.grupos.map(function(g){return'<option value="'+esc(g)+'">'}).join('');
+    var o='<option value="">— no agregar a ninguna hoja —</option>'+r.clubes.map(function(c){return'<option>'+esc(c)+'</option>'}).join('');
+    $('iClub').innerHTML=o;$('eClub').innerHTML=o.replace('no agregar a ninguna hoja','no anotar en hoja de club');
+    renderActivos();
+  });
+}
+function renderActivos(){
+  var q=norm($('eBus').value);
+  var l=IE.activos.filter(function(p){return norm(p.nombre+' '+p.rut+' '+p.grupo).indexOf(q)>=0}).slice(0,40);
+  $('eLista').innerHTML=l.map(function(p){return'<div class="soc" onclick="selEgreso('+p.fila+')"><div class="nm">'+esc(p.nombre)+'<small>'+esc(p.rut)+' · '+esc(p.grupo)+'</small></div></div>'}).join('')||'<div style="color:var(--mut);padding:8px">Sin resultados</div>';
+}
+function selEgreso(fila){
+  var p=IE.activos.filter(function(x){return x.fila===fila})[0];IE.sel=p;
+  $('eSel').textContent=p.nombre+' · '+p.grupo;$('eForm').className='';
+  var g=norm(p.grupo).replace(/[^a-z0-9]/g,''),guess='';
+  IE.clubes.forEach(function(c){var k=norm(c).replace(/[^a-z0-9]/g,'');if(g&&(k.indexOf(g)>=0||g.indexOf(k)>=0))guess=c});
+  $('eClub').value=guess;$('eForm').scrollIntoView({behavior:'smooth'});
+}
+function val(id){return $(id).value}
+function guardarIngreso(){
+  busy(true);
+  var p={nombre:val('iNom'),rut:val('iRut'),fnac:val('iFnac'),sexo:IE.sexo,tel:val('iTel'),dir:val('iDir'),grupo:val('iGrupo'),club:val('iClub'),
+    mes:val('iMes'),efam:val('iEfam'),empamMes:val('iEmpam'),ecicep:val('iEci'),haq:val('iHaq'),tug:val('iTug'),who:val('iWho')};
+  run('api_ingreso',[p],function(r){
+    busy(false);toast('✓ Ingreso registrado ('+r.edad+' años)'+(r.warnings.length?' · '+r.warnings.join(' '):''));
+    ['iNom','iRut','iFnac','iTel','iDir','iEmpam','iHaq','iTug','iWho'].forEach(function(i){$(i).value=''});setSexo('');IE.cargado=false;cargarIE();
+  });
+}
+function guardarEgreso(){
+  if(!IE.sel){toast('Elige a la persona',true);return}
+  busy(true);
+  run('api_egreso',[{fila:IE.sel.fila,mes:val('eMes'),motivo:val('eMot'),haq:val('eHaq'),tug:val('eTug'),who:val('eWho'),club:val('eClub')}],function(r){
+    busy(false);toast('✓ Egreso registrado: '+r.nombre+(r.warnings.length?' · '+r.warnings.join(' '):''));
+    ['eHaq','eTug','eWho'].forEach(function(i){$(i).value=''});$('eMot').value='';$('eForm').className='hide';IE.sel=null;IE.cargado=false;cargarIE();
+  });
+}
+initMes();loadClubs();
+</script>
+</body>
+</html>
